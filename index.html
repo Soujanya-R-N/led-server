@@ -1,119 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>LED Control</title>
   <style>
     body {
-      background: #1f3b44;
+      background: #1e2f36;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: Arial, sans-serif;
+      font-family: Arial;
+      color: white;
     }
-
     .card {
-      background: #2f4f58;
+      background: #2e4753;
       padding: 40px;
       border-radius: 20px;
-      width: 300px;
       text-align: center;
-      color: white;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      width: 300px;
     }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    #status {
-      font-size: 22px;
-      margin-bottom: 20px;
-    }
-
     .switch {
-      position: relative;
-      display: inline-block;
       width: 60px;
-      height: 34px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
+      height: 30px;
+      background: gray;
+      border-radius: 30px;
+      position: relative;
       cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 34px;
+      margin: auto;
     }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 26px;
+    .circle {
       width: 26px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
+      height: 26px;
+      background: white;
       border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
     }
-
-    input:checked + .slider {
-      background-color: #4CAF50;
+    .on {
+      background: #00c853;
     }
-
-    input:checked + .slider:before {
-      transform: translateX(26px);
+    .on .circle {
+      left: 32px;
     }
   </style>
 </head>
+
 <body>
-
   <div class="card">
-    <h1>LED Control</h1>
-    <div id="status">OFF</div>
-
-    <label class="switch">
-      <input type="checkbox" id="toggle">
-      <span class="slider"></span>
-    </label>
+    <h2>LED Control</h2>
+    <h3 id="status">OFF</h3>
+    <div class="switch" id="toggle" onclick="toggleLED()">
+      <div class="circle"></div>
+    </div>
   </div>
 
-  <script>
-    const toggle = document.getElementById("toggle");
-    const statusText = document.getElementById("status");
+<script>
+async function loadLED() {
+  const res = await fetch("/get-led");
+  const data = await res.json();
+  updateUI(data.led);
+}
 
-    const SERVER_URL = "https://led-server-production.up.railway.app";
+async function toggleLED() {
+  const newState = document.getElementById("status").innerText === "OFF" ? "ON" : "OFF";
 
-    // Get current LED state
-    fetch(`${SERVER_URL}/get-led`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.led === "ON") {
-          toggle.checked = true;
-          statusText.innerText = "ON";
-        }
-      });
+  await fetch("/update-led", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ led: newState })
+  });
 
-    // Toggle LED
-    toggle.addEventListener("change", () => {
-      const state = toggle.checked ? "ON" : "OFF";
-      statusText.innerText = state;
+  updateUI(newState);
+}
 
-      fetch(`${SERVER_URL}/update-led?led=${state}`);
-    });
-  </script>
+function updateUI(state) {
+  document.getElementById("status").innerText = state;
+  const toggle = document.getElementById("toggle");
+  toggle.className = state === "ON" ? "switch on" : "switch";
+}
 
+loadLED();
+</script>
 </body>
 </html>
