@@ -4,33 +4,26 @@ const path = require("path");
 const app = express();
 app.use(express.json());
 
-// LED state
-let ledState = "OFF";
+let ledMode = "OFF"; // OFF | ON | BLINK
 
-/* ---------- API ---------- */
-
-// ESP32 / UI get LED state
-app.get("/get-led", (req, res) => {
-  res.json({ led: ledState });
-});
-
-// Update LED state
-app.post("/update-led", (req, res) => {
-  const { led } = req.body;
-  if (led === "ON" || led === "OFF") {
-    ledState = led;
-  }
-  res.json({ status: "ok", led: ledState });
-});
-
-/* ---------- UI ---------- */
-
-// Serve index.html
+// Serve UI
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-/* ---------- START SERVER ---------- */
+// Get LED mode (ESP32 reads this)
+app.get("/get-led", (req, res) => {
+  res.json({ mode: ledMode });
+});
+
+// Update LED mode (UI sends this)
+app.post("/update-led", (req, res) => {
+  const { mode } = req.body;
+  if (["ON", "OFF", "BLINK"].includes(mode)) {
+    ledMode = mode;
+  }
+  res.json({ status: "ok", mode: ledMode });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
