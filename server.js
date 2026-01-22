@@ -1,52 +1,30 @@
-// Railway redeploy trigger
 const express = require("express");
-const app = express();
+const path = require("path");
 
-// Middleware to read JSON
+const app = express();
 app.use(express.json());
 
-// LED state stored in server
 let ledState = "OFF";
 
-/* ---------------- BASIC TEST ROUTE ---------------- */
+// Serve UI
 app.get("/", (req, res) => {
-  res.send("Server is running");
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
-/* ---------------- ESP32 API ---------------- */
-
-// ESP32 asks: LED ON or OFF?
+// ESP32 reads LED state
 app.get("/get-led", (req, res) => {
   res.json({ led: ledState });
 });
 
-// ESP32 updates LED status
-app.post("/update-led", (req, res) => {
-  if (req.body.led) {
-    ledState = req.body.led;
+// Update LED state
+app.get("/update-led", (req, res) => {
+  if (req.query.led) {
+    ledState = req.query.led;
   }
   res.send("OK");
 });
 
-/* ---------------- WEB BUTTONS ---------------- */
-
-// Turn LED ON from browser
-app.get("/on", (req, res) => {
-  ledState = "ON";
-  res.send("LED turned ON");
-});
-
-// Turn LED OFF from browser
-app.get("/off", (req, res) => {
-  ledState = "OFF";
-  res.send("LED turned OFF");
-});
-
-/* ---------------- PORT (VERY IMPORTANT) ---------------- */
-
-// Railway gives dynamic PORT
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port", PORT);
 });
