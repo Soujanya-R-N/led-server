@@ -4,17 +4,12 @@ const path = require("path");
 const app = express();
 app.use(express.json());
 
-// Serve static files (HTML, CSS, JS)
-app.use(express.static(__dirname));
-
+// LED state
 let ledState = "OFF";
 
-// Serve UI
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
+/* ---------- API ---------- */
 
-// Get LED state
+// ESP32 / UI get LED state
 app.get("/get-led", (req, res) => {
   res.json({ led: ledState });
 });
@@ -27,6 +22,15 @@ app.post("/update-led", (req, res) => {
   }
   res.json({ status: "ok", led: ledState });
 });
+
+/* ---------- UI ---------- */
+
+// Serve index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+/* ---------- START SERVER ---------- */
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
