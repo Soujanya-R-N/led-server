@@ -1,5 +1,15 @@
 {
+  "name": "led-server",
+  "version": "1.0.0",
+  "description": "ESP32 LED control server using Express",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^4.18.2"
   }
 }
